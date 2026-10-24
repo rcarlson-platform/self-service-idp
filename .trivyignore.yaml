@@ -1,0 +1,5 @@
+misconfigurations:
+  - id: KSV-0056
+    paths:
+      - "crossplane/api/clusterrole.yaml"
+    reason: "Needed: the postgresdatabase Composition creates NetworkPolicy objects (composition.yaml lines 38, 58, 86, 116). Scoped to networkpolicies only. Accepted risk R25."

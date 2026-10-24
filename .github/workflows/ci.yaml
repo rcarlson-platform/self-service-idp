@@ -122,3 +122,36 @@ jobs:
         run: |
           grep -q '^kind:' "$RUNNER_TEMP/rendered.yaml"
           kube-linter lint "$RUNNER_TEMP/rendered.yaml"
+
+  config-scan:
+    name: config-scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install trivy v0.75.0 and verify its checksum
+        run: |
+          base=https://github.com/aquasecurity/trivy/releases/download/v0.75.0
+          cd "$RUNNER_TEMP"
+          curl -fsSLO "$base/trivy_0.75.0_Linux-64bit.tar.gz"
+          curl -fsSLO "$base/trivy_0.75.0_checksums.txt"
+          grep ' trivy_0.75.0_Linux-64bit.tar.gz$' trivy_0.75.0_checksums.txt | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/bin"
+          tar -xzf trivy_0.75.0_Linux-64bit.tar.gz -C "$RUNNER_TEMP/bin" trivy
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+      - name: Scan configuration files
+        run: |
+          out="$RUNNER_TEMP/trivy.out"
+          status=0
+          trivy config . --severity HIGH,CRITICAL --exit-code 1 \
+            --ignorefile .trivyignore.yaml --skip-version-check \
+            > "$out" 2>&1 || status=$?
+          cat "$out"
+          if ! grep -Eq 'Detected config files +num=[1-9]' "$out"; then
+            echo "trivy found no configuration files to scan"
+            exit 1
+          fi
+          exit "$status"
