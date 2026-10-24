@@ -150,7 +150,7 @@ jobs:
             --ignorefile .trivyignore.yaml --skip-version-check \
             > "$out" 2>&1 || status=$?
           cat "$out"
-          if ! grep -Eq 'Detected config files +num=[1-9]' "$out"; then
+          if ! grep -Eq 'Detected config files[[:space:]]+num=[1-9]' "$out"; then
             echo "trivy found no configuration files to scan"
             exit 1
           fi
