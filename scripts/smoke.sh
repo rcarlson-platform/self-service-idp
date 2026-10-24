@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+# Smoke test: a regression guard, not a full test suite. Run it from an up-to-date main.
+# Known gaps (risk R17; backlog kept in the project handoff notes):
+#   - The Crossplane check reads the condition type, not that Healthy has status True.
+#   - The Argo CD application list is hardcoded, so a new Application is not checked.
+#   - It does not check the kube context or that kubectl and jq exist, and it hides some stderr.
+#   - There are no tenant checks yet.
 # A smoke test should run every check and report all failures,
 # not stop at the first failure.
 set -uo pipefail
