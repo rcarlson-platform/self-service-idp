@@ -1,2 +1,3 @@
 date,step,memory_used_mib,swap_used_mib,k8s_cpu_total_m,k8s_mem_total_mib,busiest_node_mem_pct,notes
 2026-10-19,P0.1,8085,1845,310,6363,41, baseline idle fresh rebuild simultaneous capture
+2026-10-24,P0.3,7047,848,401,6343,36,idle after five CI jobs merged; no tenant running; not a cold-build peak
