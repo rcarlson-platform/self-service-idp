@@ -1,0 +1,27 @@
+# Code owners for self-service-idp.
+# The last matching pattern wins. Enforcement ("Require review from Code Owners")
+# is not on yet; it comes with the ruleset (plan P0.3, item 6).
+
+# Default owner for everything not listed below.
+*                           @rcarlson-devops
+
+# CI, workflows, scanner config and the CODEOWNERS file itself.
+/.github/                   @rcarlson-devops
+
+# Policy and platform APIs.
+/kyverno-policies/          @rcarlson-devops
+/crossplane/                @rcarlson-devops
+
+# Deployment, cluster bootstrap and secrets backend.
+/argocd/                    @rcarlson-devops
+/bootstrap/                 @rcarlson-devops
+/vault-backend/             @rcarlson-devops
+
+# Helm charts, the self-service entry point and scripts.
+/charts/                    @rcarlson-devops
+/self-service/              @rcarlson-devops
+/scripts/                   @rcarlson-devops
+
+# Scanner ignore lists and lint config (a weak edit here hides findings).
+/.trivyignore.yaml          @rcarlson-devops
+/.yamllint.yaml             @rcarlson-devops
