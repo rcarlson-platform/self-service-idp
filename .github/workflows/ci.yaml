@@ -200,4 +200,4 @@ jobs:
         with:
           persist-credentials: false
       - name: Audit the CI workflow with zizmor
-        run: pipx run --spec zizmor==1.30.1 zizmor --offline --format plain .github/workflows/ci.yaml
+        run: pipx run --spec zizmor==1.30.1 zizmor --offline --config .github/zizmor.yml --format plain .github/workflows

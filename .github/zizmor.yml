@@ -1,0 +1,9 @@
+rules:
+  github-app:
+    ignore:
+      - dispatch.yaml
+      - decommission.yaml
+  artipacked:
+    ignore:
+      - dispatch.yaml
+      - decommission.yaml
