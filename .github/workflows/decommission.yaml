@@ -10,6 +10,10 @@ on:
         description: "Re-enter name of the tenant repo and resources to be deleted for confirmation"
         required: true
         type: string
+
+permissions:
+  contents: read
+
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -18,6 +22,7 @@ jobs:
     env:
       CONFIRM: ${{ inputs.confirm }}
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REF: ${{ github.ref_name }}
       SERVICE: ${{ inputs.service }}
     steps:
       - name: Validate inputs
@@ -48,7 +53,7 @@ jobs:
             echo "WARN: ${GITHUB_REPOSITORY_OWNER}/${SERVICE} does not exist"
             echo "WARN: ${GITHUB_REPOSITORY_OWNER}/${SERVICE} does not exist" >> "$GITHUB_STEP_SUMMARY"
           fi
-          if ! gh repo read-dir "argocd/tenants/${SERVICE}" --repo "${GITHUB_REPOSITORY}" --ref "${{ github.ref_name }}" &> /dev/null; then
+          if ! gh repo read-dir "argocd/tenants/${SERVICE}" --repo "${GITHUB_REPOSITORY}" --ref "${REF}" &> /dev/null; then
             echo "WARN: Tenant ${SERVICE} not present"
             echo "WARN: Tenant ${SERVICE} not present" >> "$GITHUB_STEP_SUMMARY"
           fi
@@ -71,6 +76,7 @@ jobs:
           private-key: ${{ secrets.IDP_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
           repositories: self-service-idp
+          permission-contents: write
       - name: Checkout Repo
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -78,7 +84,7 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
       - name: Delete items and commit/push
         run: |
-          if gh repo read-dir "argocd/tenants/${SERVICE}" --repo "${GITHUB_REPOSITORY}" --ref "${{ github.ref_name }}" &> /dev/null; then
+          if gh repo read-dir "argocd/tenants/${SERVICE}" --repo "${GITHUB_REPOSITORY}" --ref "${REF}" &> /dev/null; then
             rm -rf "argocd/tenants/${SERVICE}"
             git config --global user.name "github-actions[bot]"
             git config --global user.email "github-actions[bot]@users.noreply.github.com"

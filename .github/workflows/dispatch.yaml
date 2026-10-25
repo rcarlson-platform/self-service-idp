@@ -26,11 +26,16 @@ on:
           - small
           - medium
           - large
+
+permissions:
+  contents: read
+
 jobs:
   validate:
     runs-on: ubuntu-latest
     env:
       INSTANCES: ${{ inputs.instances }}
+      REF: ${{ github.ref_name }}
       SERVICE: ${{ inputs.service }}
       SIZE: ${{ inputs.size }}
       TEAM: ${{ inputs.team }}
@@ -42,6 +47,7 @@ jobs:
           client-id: ${{ secrets.IDP_APP_CLIENT_ID }}
           private-key: ${{ secrets.IDP_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
+          permission-contents: read
       - name: Validate inputs
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
@@ -91,7 +97,7 @@ jobs:
             echo "rcarlson-platform/${SERVICE} already exists" >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
-          if gh repo read-dir "argocd/tenants/${SERVICE}" --repo rcarlson-platform/self-service-idp --ref "${{ github.ref_name }}" &> /dev/null; then
+          if gh repo read-dir "argocd/tenants/${SERVICE}" --repo rcarlson-platform/self-service-idp --ref "${REF}" &> /dev/null; then
             echo "Tenant ${SERVICE} already exists"
             echo "Tenant ${SERVICE} already exists" >> "$GITHUB_STEP_SUMMARY"
             exit 1
@@ -145,6 +151,8 @@ jobs:
           client-id: ${{ secrets.IDP_APP_CLIENT_ID }}
           private-key: ${{ secrets.IDP_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
+          repositories: self-service-idp,${{ inputs.service }}
+          permission-contents: write
       - name: Poll new repo for commit
         env:
           FILE_PATH: "environments/dev/values-dev.yaml"
