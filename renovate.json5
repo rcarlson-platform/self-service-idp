@@ -1,0 +1,27 @@
+// Renovate config for self-service-idp. Hosted Mend Renovate app, installed on this repo only.
+// No automerge anywhere: the ruleset and required checks do not exist yet (plan P0.3, item 6).
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    
+    "extends": [
+        "config:best-practices"
+    ],
+    
+    // Arbitrary starting cap, not measured. Keeps review volume low for one maintainer.
+    // Revisit after the first month of real PRs.
+    "prConcurrentLimit": 5,
+
+    /*
+       Working rule 40 (14 days), extended from GitHub Actions to every manager.
+       The Trivy compromise (March 2026) was live for hours, so 14 days is a wide margin.
+       Open question: how this setting treats vulnerability-fix PRs is not yet checked.
+    */
+    "minimumReleaseAge": "14 days",
+
+    // The argocd manager matches no files by default; this pattern points it at argocd/.
+    "argocd": {
+        "managerFilePatterns": [
+            "/argocd/.+\\.yaml$/"
+        ]
+    }
+}
