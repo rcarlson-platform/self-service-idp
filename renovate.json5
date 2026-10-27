@@ -23,5 +23,18 @@
         "managerFilePatterns": [
             "/argocd/.+\\.yaml$/"
         ]
-    }
+    },
+
+    customManagers: [
+        {
+            customType: "regex",
+            managerFilePatterns: [
+                "/^\\.github/workflows/ci\\.yaml$/"
+            ],
+            matchStrings: [
+                "--spec (?<depName>[a-z0-9-]+)==(?<currentValue>[0-9.]+)"
+            ],
+            datasourceTemplate: "pypi",
+        },
+    ]
 }
