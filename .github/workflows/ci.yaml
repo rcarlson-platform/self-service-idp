@@ -201,3 +201,39 @@ jobs:
           persist-credentials: false
       - name: Audit the CI workflow with zizmor
         run: pipx run --spec zizmor==1.30.1 zizmor --offline --config .github/zizmor.yml --format plain .github/workflows
+
+  crossplane-render:
+    name: crossplane-render
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      COMPOSITION: crossplane/api/database/composition.yaml
+      TESTS: crossplane/api/database/tests
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install Crossplane CLI v2.5.0 and verify its hash
+        run: |
+          cd "$RUNNER_TEMP"
+          curl -fsSLO https://cli.crossplane.io/stable/v2.5.0/bin/linux_amd64/crossplane
+          echo "065dd6b40c9ea5fc71e49900d5c924cc0bec7f58375922ddbde6b402f292347e  crossplane" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/bin"
+          mv crossplane "$RUNNER_TEMP/bin"
+          chmod +x "$RUNNER_TEMP/bin/crossplane"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/bin/crossplane" composition render --help > /dev/null
+      - name: Execute Crossplane Render Stage One
+        run: |
+          crossplane composition render "$TESTS/xr-medium.yaml" "$COMPOSITION" crossplane/functions \
+            --include-full-xr > "$RUNNER_TEMP/s1.yaml"
+          # Stage 1 renders only the Namespace + the XR (2 kinds)
+          [ "$(grep -c '^kind:' $RUNNER_TEMP/s1.yaml)" -eq 2 ]
+      - name: Execute Crossplane Render Second Stage
+        run: |
+          crossplane composition render "$TESTS/xr-medium.yaml" "$COMPOSITION" crossplane/functions \
+            --include-full-xr -o "$TESTS/observed-namespace.yaml" > "$RUNNER_TEMP/s2.yaml"
+          # Stage 2, with the Namespace observed Ready, adds the Cluster and the 4 NetworkPolicies, for 7 kinds in total
+          [ "$(grep -c '^kind:' $RUNNER_TEMP/s2.yaml)" -eq 7 ]
+          [ "$(grep -c '^kind: NetworkPolicy$' $RUNNER_TEMP/s2.yaml)" -eq 4 ]
