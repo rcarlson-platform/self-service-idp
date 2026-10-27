@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: render-test-db
+  annotations:
+    crossplane.io/composition-resource-name: namespace
+status:
+  phase: Active
+  conditions:
+    - type: Ready
+      status: "True"
